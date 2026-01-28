@@ -38,3 +38,15 @@ npm run test
 # e2e tests
 npm run test:e2e
 ```
+
+## Environment variables
+
+Create a `.env` file in the project root.
+
+- `PORT` — port where the HTTP server will run (default: 3000)
+
+Example:
+
+```env
+PORT=3000
+```

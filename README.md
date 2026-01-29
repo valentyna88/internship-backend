@@ -1,19 +1,37 @@
 # Internship-backend
 
-Backend service on NestJS.
+Backend service built with NestJS.
+
+---
 
 ## Requirements
+
+For local development without Docker:
 
 - Node.js (LTS)
 - npm
 
-## Install
+For Docker usage:
+
+- Docker
+- Docker Compose
+
+---
+
+## Application URLs
+
+- Application: http://localhost:3000
+- Swagger API documentation: http://localhost:3000/api
+
+---
+
+## Install (local)
 
 ```bash
 npm install
 ```
 
-## Compile and run the project
+## Compile and run the project (local)
 
 ```bash
 # development
@@ -25,9 +43,7 @@ npm run start
 npm run start:dev
 ```
 
-By default app runs on http://localhost:3000
-
-## Run tests
+## Run tests (local)
 
 ```bash
 # unit tests
@@ -49,4 +65,42 @@ Example:
 
 ```env
 PORT=3000
+```
+
+## Run with Docker
+
+### Build image
+
+```bash
+docker build -t internship-backend .
+```
+
+### Run container
+
+```bash
+docker run -p 3000:3000 internship-backend
+```
+
+### Run with docker-compose (recommended for local development)
+
+```bash
+docker compose up --build
+```
+
+To stop containers:
+
+```bash
+docker compose down
+```
+
+### Run tests in Docker
+
+```bash
+# run unit tests inside container
+docker run --rm internship-backend npm test
+```
+
+```bash
+# if you use docker-compose (service name: api)
+docker compose exec api npm test
 ```

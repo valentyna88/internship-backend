@@ -1,17 +1,27 @@
 # Internship-backend
 
-Backend service built with NestJS.
+Backend service built with NestJS, PostgreSQL and TypeORM.
+
+---
+
+## Tech Stack
+
+- NestJS
+- PostgreSQL
+- TypeORM
+- Docker & Docker Compose
 
 ---
 
 ## Requirements
 
-For local development without Docker:
+### Local development (without Docker)
 
 - Node.js (LTS)
 - npm
+- PostgreSQL (running locally)
 
-For Docker usage:
+### Docker development
 
 - Docker
 - Docker Compose
@@ -25,82 +35,83 @@ For Docker usage:
 
 ---
 
-## Install (local)
+# Local Development
+
+## Install
 
 ```bash
 npm install
 ```
 
-## Compile and run the project (local)
+## Run
 
 ```bash
-# development
-npm run start
-```
-
-```bash
-# watch mode
+# dev
 npm run start:dev
 ```
 
-## Run tests (local)
+## Tests
 
 ```bash
-# unit tests
 npm run test
-```
-
-```bash
-# e2e tests
 npm run test:e2e
 ```
 
 ## Environment variables
 
-Create a `.env` file in the project root.
-
-- `PORT` — port where the HTTP server will run (default: 3000)
-
-Example:
+Create `.env` in the project root (example values for local development).
 
 ```env
 PORT=3000
+POSTGRES_HOST=postgres
+POSTGRES_PORT=5432
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_DB=internship
 ```
 
-## Run with Docker
+# Docker Usage
 
-### Build image
-
-```bash
-docker build -t internship-backend .
-```
-
-### Run container
-
-```bash
-docker run -p 3000:3000 internship-backend
-```
-
-### Run with docker-compose (recommended for local development)
+### Start everything (API + PostgreSQL)
 
 ```bash
 docker compose up --build
 ```
 
-To stop containers:
+Stop
 
 ```bash
 docker compose down
 ```
 
+App will be available at: http://localhost:3000
+
 ### Run tests in Docker
 
 ```bash
-# run unit tests inside container
-docker run --rm internship-backend npm test
+docker compose exec api npm test
 ```
 
+---
+
+## Database
+
+PostgreSQL runs in a Docker container.
+
+Connection is configured via TypeORM using env variables.
+
+## Auto Rebuild on Code Changes
+
+Docker Compose is configured with:
+
+- volumes
+- develop.watch
+
+This allows automatic rebuild & container restart when files change.
+
+### Run watch mode
+
 ```bash
-# if you use docker-compose (service name: api)
-docker compose exec api npm test
+docker compose up -d --build
+docker compose watch
 ```

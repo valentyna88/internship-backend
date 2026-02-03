@@ -1,23 +1,12 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToOne,
-  CreateDateColumn,
-} from 'typeorm';
+import { Entity, Column, ManyToOne } from 'typeorm';
 import { User } from '../user/user.entity';
+import { BaseEntity } from '../common/entities/base.entity';
 
 @Entity('auth')
-export class Auth {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
+export class Auth extends BaseEntity {
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   user: User;
 
   @Column()
   refreshTokenHash: string;
-
-  @CreateDateColumn()
-  createdAt: Date;
 }

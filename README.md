@@ -100,6 +100,43 @@ PostgreSQL runs in a Docker container.
 
 Connection is configured via TypeORM using env variables.
 
+## Migrations
+
+Database schema changes are managed using TypeORM migrations.
+
+Migrations are executed inside Docker containers to ensure the same environment for development.
+
+### Generate migration
+
+```bash
+npm run migrate:generate -- src/migrations/<migration-name>
+```
+
+This command compares current entities with the database schema and generates a new migration file.
+
+## Apply migrations
+
+```bash
+npm run migrate:run
+```
+
+Applies all pending migrations to the database.
+
+### Revert last migration
+
+```bash
+npm run migrate:revert
+```
+
+Rolls back the last applied migration.
+Migration files are stored in:
+
+```bash
+src/migrations
+```
+
+Applied migrations are tracked in the migrations table inside the database.
+
 ## Auto Rebuild on Code Changes
 
 Docker Compose is configured with:

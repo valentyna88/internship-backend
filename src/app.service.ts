@@ -1,13 +1,8 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
-import { HealthcheckResponseDto } from './dto/healthcheck-response.dto';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class AppService {
-  getHealthcheck(): HealthcheckResponseDto {
-    return {
-      status_code: HttpStatus.OK,
-      detail: 'ok',
-      result: 'working',
-    };
+  getHealthcheck(): string {
+    return 'ok';
   }
 }

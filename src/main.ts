@@ -20,6 +20,7 @@ async function bootstrap() {
     .setTitle('Internship Backend')
     .setDescription('API documentation')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
 
   const documentFactory = () => SwaggerModule.createDocument(app, config);

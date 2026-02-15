@@ -84,4 +84,8 @@ export class UserService {
 
     return { id };
   }
+
+  async findOneByEmail(email: string): Promise<User | null> {
+    return this.userRepository.findOne({ where: { email } });
+  }
 }

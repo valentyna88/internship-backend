@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   Param,
   Patch,
@@ -24,6 +25,8 @@ import { UserPaginationDetailDto } from './dto/user-pagination.dto';
 import { UserSingleDetailDto } from './dto/user-detail.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AllAuthGuard } from '../auth/guards/all-auth.guard';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { User } from './user.entity';
 
 @ApiTags('users')
 @Controller('users')
@@ -60,7 +63,14 @@ export class UserController {
   @Patch(':id')
   @ApiOperation({ summary: 'Updating an existing user' })
   @ApiOkResponse({ type: UserSingleDetailDto })
-  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  async update(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+    @CurrentUser() currentUser: User,
+  ) {
+    if (currentUser.id !== id) {
+      throw new ForbiddenException('You can only update your own profile');
+    }
     return await this.userService.update(id, updateUserDto);
   }
 
@@ -69,7 +79,10 @@ export class UserController {
   @Delete(':id')
   @ApiOperation({ summary: 'Deleting an existing user' })
   @ApiOkResponse({ type: ApiResponseDto })
-  async remove(@Param('id') id: string) {
+  async remove(@Param('id') id: string, @CurrentUser() currentUser: User) {
+    if (currentUser.id !== id) {
+      throw new ForbiddenException('You can only delete your own profile');
+    }
     return await this.userService.remove(id);
   }
 }

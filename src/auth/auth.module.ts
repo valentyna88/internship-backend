@@ -7,7 +7,6 @@ import { AuthController } from './auth.controller';
 import { UserModule } from '../user/user.module';
 import { getJwtConfig } from '../config/jwt.config';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { LocalStrategy } from './strategies/local.strategy';
 import { Auth0Strategy } from './strategies/auth0.strategy';
 
 @Module({
@@ -20,7 +19,7 @@ import { Auth0Strategy } from './strategies/auth0.strategy';
       useFactory: getJwtConfig,
     }),
   ],
-  providers: [AuthService, LocalStrategy, JwtStrategy, Auth0Strategy],
+  providers: [AuthService, JwtStrategy, Auth0Strategy],
   controllers: [AuthController],
   exports: [AuthService],
 })

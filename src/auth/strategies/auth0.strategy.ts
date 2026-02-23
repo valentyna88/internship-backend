@@ -41,28 +41,6 @@ export class Auth0Strategy extends PassportStrategy(Strategy, 'auth0') {
       );
     }
 
-    const result = await this.userService.findOneByEmail(email);
-
-    if (result) {
-      if ('user' in result && result.user) {
-        return result.user as User;
-      }
-      if ('id' in result) {
-        return result as unknown as User;
-      }
-    }
-
-    return this.registerAuth0User(email);
-  }
-
-  private async registerAuth0User(email: string): Promise<User> {
-    const temporaryPassword = randomBytes(16).toString('hex') + 'A0!';
-
-    const createdResult = (await this.userService.create({
-      email,
-      password: temporaryPassword,
-    })) as UserServiceResponse;
-
-    return createdResult.user;
+    return this.userService.findOrCreateByAuth0Email(email);
   }
 }

@@ -7,6 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { randomBytes } from 'crypto';
 import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
@@ -83,5 +84,22 @@ export class UserService {
     this.logger.log(`User deleted: ${user.email} (ID: ${id})`);
 
     return { id };
+  }
+
+  async findOneByEmail(email: string): Promise<User | null> {
+    return this.userRepository.findOne({ where: { email } });
+  }
+
+  async findOrCreateByAuth0Email(email: string): Promise<User> {
+    const existingUser = await this.findOneByEmail(email);
+    if (existingUser) {
+      return existingUser;
+    }
+    const temporaryPassword = randomBytes(16).toString('hex') + 'A0!';
+    const passwordHash = await bcrypt.hash(temporaryPassword, 10);
+    const user = this.userRepository.create({ email, passwordHash });
+    const savedUser = await this.userRepository.save(user);
+    this.logger.log(`Auth0 User auto-registered: ${savedUser.email}`);
+    return savedUser;
   }
 }

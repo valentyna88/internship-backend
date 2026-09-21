@@ -1,4 +1,4 @@
-import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn, ManyToMany } from 'typeorm';
 import { BaseEntity } from '../../common/entities/base.entity';
 import { User } from '../../user/user.entity';
 
@@ -19,4 +19,7 @@ export class Company extends BaseEntity {
   @ManyToOne(() => User, (user) => user.companies, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'ownerId' })
   owner: User;
+
+  @ManyToMany(() => User, (user) => user.membersOf)
+  members: User[];
 }

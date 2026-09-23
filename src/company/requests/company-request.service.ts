@@ -14,6 +14,7 @@ import {
 import { Company } from '../entities/company.entity';
 import { createPaginationObject } from 'src/common/utils/pagination.util';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { User } from 'src/user/user.entity';
 
 @Injectable()
 export class CompanyRequestService {
@@ -22,6 +23,8 @@ export class CompanyRequestService {
     private readonly requestRepository: Repository<CompanyRequest>,
     @InjectRepository(Company)
     private readonly companyRepository: Repository<Company>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
 
   private async findRequestOrThrow(
@@ -106,6 +109,14 @@ export class CompanyRequestService {
     await this.validateCompanyOwnership(companyId, ownerId);
     if (userId === ownerId)
       throw new BadRequestException('You cannot invite yourself');
+
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
 
     await this.checkExistingInvitation(companyId, userId);
 

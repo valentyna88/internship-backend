@@ -142,6 +142,8 @@ export class CompanyRequestService {
       throw new ForbiddenException('Only the owner can cancel invitation');
     }
 
+    this.validatePending(request);
+
     await this.requestRepository.remove(request);
     return { message: 'Invitation cancelled successfully' };
   }

@@ -131,7 +131,10 @@ export class CompanyRequestService {
 
   async cancelInvitation(requestId: string, ownerId: string) {
     const request = await this.findRequestOrThrow({
-      where: { id: requestId },
+      where: {
+        id: requestId,
+        type: RequestType.INVITATION,
+      },
       relations: ['company'],
     });
 

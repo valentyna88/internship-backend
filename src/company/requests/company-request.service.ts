@@ -105,6 +105,22 @@ export class CompanyRequestService {
     return createPaginationObject(items, total, page, limit);
   }
 
+  private async validateNotMember(
+    companyId: string,
+    userId: string,
+  ): Promise<void> {
+    const memberCompany = await this.companyRepository
+      .createQueryBuilder('company')
+      .innerJoin('company.members', 'member')
+      .where('company.id = :companyId', { companyId })
+      .andWhere('member.id = :userId', { userId })
+      .getOne();
+
+    if (memberCompany) {
+      throw new BadRequestException('User is already a member of this company');
+    }
+  }
+
   async inviteUser(companyId: string, userId: string, ownerId: string) {
     await this.validateCompanyOwnership(companyId, ownerId);
     if (userId === ownerId)
@@ -117,6 +133,8 @@ export class CompanyRequestService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
+
+    await this.validateNotMember(companyId, userId);
 
     await this.checkExistingInvitation(companyId, userId);
 
@@ -182,14 +200,7 @@ export class CompanyRequestService {
     if (company.ownerId === userId)
       throw new BadRequestException('You are the owner');
 
-    const isMember = await this.companyRepository
-      .createQueryBuilder('company')
-      .leftJoin('company.members', 'member')
-      .where('company.id = :companyId', { companyId })
-      .andWhere('member.id = :userId', { userId })
-      .getOne();
-
-    if (isMember) throw new BadRequestException('You are already a member');
+    await this.validateNotMember(companyId, userId);
 
     const existing = await this.requestRepository.findOne({
       where: {

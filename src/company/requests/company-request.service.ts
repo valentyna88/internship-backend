@@ -79,8 +79,9 @@ export class CompanyRequestService {
   private async addMemberToCompany(
     companyId: string,
     userId: string,
+    companyRepository: Repository<Company> = this.companyRepository,
   ): Promise<void> {
-    await this.companyRepository
+    await companyRepository
       .createQueryBuilder()
       .relation(Company, 'members')
       .of(companyId)
@@ -108,8 +109,9 @@ export class CompanyRequestService {
   private async validateNotMember(
     companyId: string,
     userId: string,
+    companyRepository: Repository<Company> = this.companyRepository,
   ): Promise<void> {
-    const memberCompany = await this.companyRepository
+    const memberCompany = await companyRepository
       .createQueryBuilder('company')
       .innerJoin('company.members', 'member')
       .where('company.id = :companyId', { companyId })
@@ -167,18 +169,40 @@ export class CompanyRequestService {
   }
 
   async acceptInvitation(requestId: string, userId: string) {
-    const request = await this.findRequestOrThrow({
-      where: { id: requestId, userId, type: RequestType.INVITATION },
-      relations: ['company'],
+    return this.requestRepository.manager.transaction(async (manager) => {
+      const requestRepository = manager.getRepository(CompanyRequest);
+      const companyRepository = manager.getRepository(Company);
+
+      const request = await requestRepository.findOne({
+        where: {
+          id: requestId,
+          userId,
+          type: RequestType.INVITATION,
+        },
+        lock: { mode: 'pessimistic_write' },
+      });
+
+      if (!request) {
+        throw new NotFoundException('Request not found or access denied');
+      }
+
+      this.validatePending(request);
+
+      await this.validateNotMember(
+        request.companyId,
+        userId,
+        companyRepository,
+      );
+
+      await this.addMemberToCompany(
+        request.companyId,
+        userId,
+        companyRepository,
+      );
+
+      request.status = RequestStatus.ACCEPTED;
+      return await requestRepository.save(request);
     });
-
-    this.validatePending(request);
-
-    request.status = RequestStatus.ACCEPTED;
-    await this.requestRepository.save(request);
-    await this.addMemberToCompany(request.companyId, userId);
-
-    return request;
   }
 
   async declineInvitation(requestId: string, userId: string) {

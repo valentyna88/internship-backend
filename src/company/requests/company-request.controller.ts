@@ -195,7 +195,8 @@ export class CompanyRequestController {
   @ApiOperation({ summary: 'Cancel join request' })
   @ApiOkResponse({ type: ApiResponseDto })
   async cancelJoin(
-    @Param('requestId') requestId: string,
+    @Param('requestId', new ParseUUIDPipe({ version: '4' }))
+    requestId: string,
     @Req() req: RequestWithUser,
   ) {
     return await this.requestService.cancelJoinRequest(requestId, req.user.id);

@@ -11,6 +11,7 @@ import {
   Patch,
   Get,
   Query,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -117,7 +118,11 @@ export class CompanyRequestController {
   @Post(':id/join')
   @ApiOperation({ summary: 'Send request to join company' })
   @ApiCreatedResponse({ type: CompanyRequestCreatedResponseDto })
-  async join(@Param('id') companyId: string, @Req() req: RequestWithUser) {
+  async join(
+    @Param('id', new ParseUUIDPipe({ version: '4' }))
+    companyId: string,
+    @Req() req: RequestWithUser,
+  ) {
     return await this.requestService.sendJoinRequest(companyId, req.user.id);
   }
 

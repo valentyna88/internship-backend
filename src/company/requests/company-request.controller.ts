@@ -159,7 +159,8 @@ export class CompanyRequestController {
   @ApiOperation({ summary: 'Owner: Accept join request' })
   @ApiOkResponse({ type: CompanyRequestResponseDto })
   async acceptJoin(
-    @Param('requestId') requestId: string,
+    @Param('requestId', new ParseUUIDPipe({ version: '4' }))
+    requestId: string,
     @Req() req: RequestWithUser,
   ) {
     return await this.requestService.acceptJoinRequest(requestId, req.user.id);

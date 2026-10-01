@@ -258,22 +258,51 @@ export class CompanyRequestService {
   }
 
   async acceptJoinRequest(requestId: string, ownerId: string) {
-    const request = await this.findRequestOrThrow({
-      where: { id: requestId, type: RequestType.JOIN_REQUEST },
-      relations: ['company'],
+    return this.requestRepository.manager.transaction(async (manager) => {
+      const requestRepository = manager.getRepository(CompanyRequest);
+      const companyRepository = manager.getRepository(Company);
+
+      const request = await requestRepository.findOne({
+        where: {
+          id: requestId,
+          type: RequestType.JOIN_REQUEST,
+        },
+        lock: { mode: 'pessimistic_write' },
+      });
+
+      if (!request) {
+        throw new NotFoundException('Request not found or access denied');
+      }
+
+      const company = await companyRepository.findOne({
+        where: { id: request.companyId },
+      });
+
+      if (!company) {
+        throw new NotFoundException('Company not found');
+      }
+
+      if (company.ownerId !== ownerId) {
+        throw new ForbiddenException('Only owner can accept join requests');
+      }
+
+      this.validatePending(request);
+
+      await this.validateNotMember(
+        request.companyId,
+        request.userId,
+        companyRepository,
+      );
+
+      await this.addMemberToCompany(
+        request.companyId,
+        request.userId,
+        companyRepository,
+      );
+
+      request.status = RequestStatus.ACCEPTED;
+      return await requestRepository.save(request);
     });
-
-    if (request.company.ownerId !== ownerId) {
-      throw new ForbiddenException('Only owner can accept join requests');
-    }
-
-    this.validatePending(request);
-
-    request.status = RequestStatus.ACCEPTED;
-    await this.requestRepository.save(request);
-    await this.addMemberToCompany(request.companyId, request.userId);
-
-    return request;
   }
 
   async declineJoinRequest(requestId: string, ownerId: string) {
